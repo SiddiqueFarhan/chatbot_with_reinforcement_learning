@@ -191,13 +191,13 @@ else:
             
             st.success("Model memory updated")
 
-    # Clear database button
-    if st.button("Clear the database"):
-        with st.spinner("Clearing the database..."):
-            try:
-                pc = Pinecone(api_key=api_key)
-                index = pc.Index(index_name)
-                index.delete(delete_all=True, namespace=namespace)
-                st.success("Database cleared!")
-            except:
-                st.error("The database is already empty.")
+    # # Clear database button
+    # if st.button("Clear the database"):
+    #     with st.spinner("Clearing the database..."):
+    #         try:
+    #             pc = Pinecone(api_key=api_key)
+    #             index = pc.Index(index_name)
+    #             index.delete(delete_all=True, namespace=namespace)
+    #             st.success("Database cleared!")
+    #         except:
+    #             st.error("The database is already empty.")
