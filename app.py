@@ -170,13 +170,13 @@ else:
             st.write(f"**Answer**: {st.session_state.answer}")
             st.write(f"**Feedback**: {st.session_state.feedback_text}")
             
-            # Create the memory reinforcement string
             memory_reinforcement = (
-                "Hey LLM, following is the case in which you didn't perform as intended. "
-                f"This was the question that was asked: {st.session_state.question} "
-                f"You gave the wrong answer as: {st.session_state.answer} "
-                f"However the correct answer shold have been like this: {st.session_state.feedback_text}"
-            )
+                "Hello LLM, we've identified a recent interaction where your performance did not meet expectations. "
+                f"The question posed was: '{st.session_state.question}'. "
+                f"Unfortunately, your response was: '{st.session_state.answer}'. "
+                f"The correct response should have been: '{st.session_state.feedback_text}'. "
+                "Please use this information to improve future responses."
+            )      
             
             # Convert raw text to Document object
             document_reinf = Document(page_content=memory_reinforcement)
