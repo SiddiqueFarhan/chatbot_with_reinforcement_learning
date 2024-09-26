@@ -130,7 +130,7 @@ else:
                     )
                 st.success("Document uploaded and processed. You can now ask questions about its content.")
     else:
-        st.write("The model memory has already been updated. You may ask the questions now!!")
+        pass
 
     # Question input and response
     question = st.text_input("Ask queries related to the uploaded knowledge:")
