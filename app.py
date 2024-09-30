@@ -10,11 +10,44 @@ from langchain_openai import ChatOpenAI
 from langchain.chains import RetrievalQA
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_core.documents import Document  # Import Document class
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
 
 # Set API keys
 openai_api_key = os.getenv("OPENAI_API_KEY")
 api_key = os.getenv("PINECONE_API_KEY")
 os.environ['PINECONE_API_KEY'] = api_key
+
+
+uri = "mongodb+srv://nic:mydatabase@cluster0.0plxa.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+
+
+# Create a new client and connect to the server
+client = MongoClient(uri, server_api=ServerApi('1'))
+
+# Access your database (replace 'applicationinfo' with your actual database name)
+db = client['applicationinfo']
+
+# Access collections for 'questions' and 'uploadedpdf'
+questions_collection = db['questions_old']
+uploadedpdf_collection = db['uploadedpdf_old']
+
+# Functions for 'questions' collection
+def insert_question(question):
+    """Inserts a question into the 'questions' collection."""
+    data = {"name": question}
+    result = questions_collection.insert_one(data)
+
+
+# Functions for 'uploadedpdf' collection
+def insert_pdf_data(pdf_data):
+    """Inserts PDF data into the 'uploadedpdf' collection."""
+    data = {"pdf_content": pdf_data}
+    result = uploadedpdf_collection.insert_one(data)
+
+
+
+
 
 # Define constants
 namespace = "wondervector5000"
@@ -128,9 +161,14 @@ else:
                         embedding=embeddings,
                         namespace=namespace,
                     )
+                # Concatenate all chunks of text into one string to store in MongoDB
+                pdf_text = "\n".join([doc.page_content for doc in documents])
+
+                # Save extracted PDF text into MongoDB
+                insert_pdf_data(pdf_text)
+
                 st.success("Document uploaded and processed. You can now ask questions about its content.")
-    else:
-        pass
+
 
     # Question input and response
     question = st.text_input("Ask queries related to the uploaded knowledge:")
@@ -139,6 +177,7 @@ else:
             retrieved_docs = docsearch.as_retriever(search_kwargs={"k": 10}).get_relevant_documents(question)
             context = "\n\n".join([doc.page_content for doc in retrieved_docs])
             answer = qa.invoke(question)
+            insert_question(question) 
             st.session_state.answer = answer["result"]
             st.session_state.question = question
             st.session_state.feedback_given = False
@@ -190,14 +229,3 @@ else:
             )
             
             st.success("Model memory updated")
-
-    # # Clear database button
-    # if st.button("Clear the database"):
-    #     with st.spinner("Clearing the database..."):
-    #         try:
-    #             pc = Pinecone(api_key=api_key)
-    #             index = pc.Index(index_name)
-    #             index.delete(delete_all=True, namespace=namespace)
-    #             st.success("Database cleared!")
-    #         except:
-    #             st.error("The database is already empty.")
